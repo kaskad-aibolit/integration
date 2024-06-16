@@ -16,3 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::post('/bitrix/kaskad/button',  function () {
+    return view('kaskadButton');
+});

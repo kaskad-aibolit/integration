@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Api\CRM\Bitrix24Controller;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -179,11 +178,18 @@ class KaskadController extends Controller
 			);
 		}
     }
-    public function updateRegistration(Request $request) 
+    public function updateVisit(Request $request) 
     {
+		log::info($request);
 		if ($request['token'] !== '$2y$10$5HbZBDfXnRwE6L6TdJqnnuAGCZfnvf7xFCbgBeyV0mpnCMPYHM58O') {
 			return;
 		}
+		$instanceFields = $this->call(
+			'crm.item.fields',
+			["entityTypeId" => 133]
+		);
+		log::info('$instanceFields');
+		log::info($instanceFields);
         $instanceList  = $this->call(
 			'crm.item.list',
 			[
@@ -247,11 +253,8 @@ class KaskadController extends Controller
 			);
 		}
     }
-    public function updateSuggestedRegistration(Request $request) 
+    public function updateSuggestedVisit(Request $request) 
     {
-		$typeList  = $this->call(
-			'crm.type.list',
-		);
 		if ($request['token'] !== '$2y$10$5HbZBDfXnRwE6L6TdJqnnuAGCZfnvf7xFCbgBeyV0mpnCMPYHM58O') {
 			return;
 		}
@@ -390,7 +393,6 @@ class KaskadController extends Controller
     }
     public function updateCabinet(Request $request) 
     {
-		log::info($request);
 		if ($request['token'] !== '$2y$10$5HbZBDfXnRwE6L6TdJqnnuAGCZfnvf7xFCbgBeyV0mpnCMPYHM58O') {
 			return;
 		}
@@ -398,7 +400,6 @@ class KaskadController extends Controller
 			'crm.item.fields',
 			["entityTypeId" => 172]
 		);
-		log::info($instanceFields);
         $instanceList  = $this->call(
 			'crm.item.list',
 			[
@@ -432,45 +433,97 @@ class KaskadController extends Controller
 		}
     }
 
-	// protected function callKaskadForm()
-	// {
-	// 	$params = [
-	// 		'FIELDS' => [
-	// 			'IS_NEW' => 'Y',
-	// 			'TITLE' => 'Форма обратной связи ',
-	// 			'NAME' => $name,
-	// 			'PHONE' => [['VALUE' => $phone, 'VALUE_TYPE' => 'WORK']],
-	// 			'EMAIL' => [['VALUE' => $email, 'VALUE_TYPE' => 'WORK']],
-	// 			'COMMENTS' => $comment,
-	// 			'FIELDS[SOURCE_ID]' => 'WEB',
-	// 			'SOURCE_DESCRIPTION' => $source_link,
-	// 		]
-	// 	];
-	// 	$client = new Client();
+	public function setupBitrix(Request $request)
+	{
+		log::info('setup bitrix');
+		$userfieldtype = $this->call(
+			'userfieldtype.list'
+		);
 
-	// 	$options = [
-	// 	    'allow_redirects' => [
-	// 	        'max' => 10
-	// 	    ],
-	// 	    'headers' => [
-	// 	        'User-Agent' => 'Bitrix24 CRest PHP 1.0'
-	// 	    ],
-	// 	    'curl'=> [
-	// 	    	CURLOPT_POSTREDIR => 3
-	// 	    ]
-	// 	];
+		foreach ($userfieldtype['result'] as $key => $value) {
+			$this->call(
+				'userfieldtype.delete',
+				[
+					'USER_TYPE_ID' => $value['USER_TYPE_ID'],
+				]
+			);
+		}
+		$userfieldtypelead = $this->call(
+			'crm.lead.userfield.list',
+		);
+		foreach ($userfieldtypelead['result'] as $key => $value) {
+			$this->call(
+				'crm.lead.userfield.delete',
+				[
+					'ID' => $value['ID'],
+				]
+			);
+		}
+		$this->call(
+			'userfieldtype.add',
+			[
+				'USER_TYPE_ID' => 'aibolit_button',
+				'HANDLER' => 'https://cnadmindemo.dynamicov.com/bitrix/kaskad/button',
+				'TITLE' => 'Aibolit',
+				'OPTIONS'=> [
+					'height'=> 70,
+				],
+			]
+		);
+		$this->call(
+			'crm.lead.userfield.add',
+			[
+				'fields' => [
+					"FIELD_NAME" => "Aibolit",
+					"USER_TYPE_ID" => "aibolit_button",
+				]
+			]
+		);
+	}
 
-
-	// 	if (!empty($params)) {
-	// 	    $options['form_params'] = $params;
-	// 	}
-	// 	try {
-	// 		$response = $client->request('POST', 'https://bitrix.494.by/rest/1138/jup396oui2fn2zcf/crm.lead.add.json', $options);
-			
-	// 		$result = json_decode($response->getBody(), true);
-	// 		log::info($result);
-	// 	} catch (ClientException $e) {
-	// 		log::info($e->getMessage());
-	// 	}
-	// }
+	public function updateService(Request $request) 
+    {
+		log::info("request");
+		log::info($request);
+		if ($request['token'] !== '$2y$10$5HbZBDfXnRwE6L6TdJqnnuAGCZfnvf7xFCbgBeyV0mpnCMPYHM58O') {
+			return;
+		}
+		// $instanceFields  = $this->call(
+		// 	'crm.product.fields',
+		// 	);
+		// log::info($instanceFields);
+        $instanceList  = $this->call(
+			'crm.product.service.list',
+			[
+				'filter' => [
+					'PROPERTY_68' => $request['id'],
+				]
+			]
+		);
+		$fields = [
+			'PROPERTY_68' => $request['id'],
+			'NAME' => $request['name'],
+			'PROPERTY_71' => $request['count'],
+			'PROPERTY_72' => $request['price'],
+			'PROPERTY_73' => $request['summa'],
+			'PROPERTY_74' => $request['summaWithDiscont'],
+		];
+		if($instanceList['total'] == 0) {
+			$this->call(
+				'crm.product.service.add',
+				[
+					'fields' => $fields
+				]
+			);
+		}
+		if($instanceList['total'] != 0) {
+			$this->call(
+				'crm.product.service.update',
+				[
+					'id'=>$instanceList['result']['items'][0]['id'],
+					'fields' => $fields
+				]
+			);
+		}
+    }
 }
