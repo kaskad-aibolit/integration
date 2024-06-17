@@ -22,13 +22,13 @@ Route::prefix('bitrix24')->group(function () {
     Route::prefix('kaskad')->group(function () {
         Route::group(['middleware' => ['web']], function () {
             Route::post('/setup', [App\Http\Controllers\Api\KaskadController::class, 'setupBitrix']);
-            Route::post('/update/contact', [App\Http\Controllers\Api\KaskadController::class, 'updateContact']);
+            Route::post('/update/contact', [App\Http\Controllers\Api\KaskadController::class, 'updateContactRequest']);
             Route::post('/update/visit', [App\Http\Controllers\Api\KaskadController::class, 'updateVisit']);
-            Route::post('/update/sug-visit', [App\Http\Controllers\Api\KaskadController::class, 'updateSuggestedVisit']);
-            Route::post('/update/doctors', [App\Http\Controllers\Api\KaskadController::class, 'updateDoctors']);
-            Route::post('/update/speciality', [App\Http\Controllers\Api\KaskadController::class, 'updateSpeciality']);
-            Route::post('/update/cabinet', [App\Http\Controllers\Api\KaskadController::class, 'updateCabinet']);
-            Route::post('/update/service', [App\Http\Controllers\Api\KaskadController::class, 'updateService']);
+            Route::post('/update/sug-visit', [App\Http\Controllers\Api\KaskadController::class, 'updateSuggestedVisitRequest']);
+            Route::post('/update/doctors', [App\Http\Controllers\Api\KaskadController::class, 'updateDoctorRequest']);
+            Route::post('/update/speciality', [App\Http\Controllers\Api\KaskadController::class, 'updateSpecialityRequest']);
+            Route::post('/update/cabinet', [App\Http\Controllers\Api\KaskadController::class, 'updateCabinetRequest']);
+            Route::post('/update/service', [App\Http\Controllers\Api\KaskadController::class, 'updateServiceRequest']);
         });
       });
 
