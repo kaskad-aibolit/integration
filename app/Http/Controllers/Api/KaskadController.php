@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use GuzzleHttp\Exception\ClientException;
@@ -234,8 +235,22 @@ class KaskadController extends Controller
 		return $id;
 	}
 
+	public function example(Request $request) 
+	{
+		log::info('example');
+		log::info($request);
+		$headers = [
+			'Authorization' => 'Bearer a9322698-4171-4409-a429-0b24012ad25e',
+			'Accept' => 'application/json',
+		];
+		$response = Http::withHeaders($headers)->get('http://127.0.0.1:8001/api/update/visit');
+		log::info($response);
+	}
+
     public function updateVisit(Request $request)
     {
+		log::info('updateVisit');
+		log::info($request);
 		// $typeList  = $this->call(
 		// 	'crm.type.list',
 		// );
