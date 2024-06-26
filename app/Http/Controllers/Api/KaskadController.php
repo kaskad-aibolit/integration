@@ -14,6 +14,7 @@ class KaskadController extends Controller
 
     protected $token = [
         "expires"=> 1717596552,
+        // "baseDomain"=> "10.3.4.2",
         "baseDomain"=> "bitrix.494.by",
         "accessToken"=> "88716066006e74b40068c0eb000004720000073d421badce02def73dd2ec3bcf7516b7",
         "refreshToken"=> "78f08766006e74b40068c0eb00000472000007ced39b10ec61326dfb0595b03072ecee",
@@ -175,7 +176,13 @@ class KaskadController extends Controller
 
     public function updateContactRequest(Request $request) 
     {
-		$this->updateContact($request);
+		try {
+			$res = $this->updateContact($request);
+			return response()->json(['result' => $res], 200);
+		} catch (\Throwable $th) {
+        	return response()->json(['message' => $th], 500);
+		}
+		
     }
 
 	public function updateContact($contact)
@@ -251,110 +258,104 @@ class KaskadController extends Controller
     {
 		log::info('updateVisit');
 		log::info($request);
-		// $typeList  = $this->call(
-		// 	'crm.type.list',
-		// );
-		// log::info($typeList);
-
-		// create contact 
-		$contactId = $this->updateContact($request);
-		// create doctor 
-		$doctorId = $this->updateDoctor($request);
-		// create suggestedVisits 
-		// $sugVisitId = $this->updateSuggestedVisit($request);
-		// create suggestedVisits 
-		$specialityId = $this->updateSpeciality($request);
-		// create suggestedVisits 
-		$cabinetId = $this->updateCabinet($request);
-
-
-
-		// $instanceFields = $this->call(
-		// 	'crm.item.fields',
-		// 	["entityTypeId" => 133]
-		// );
-		// log::info($instanceFields);
-        $instanceList  = $this->call(
-			'crm.item.list',
-			[
-				"entityTypeId" => 133,
-				'filter' => [
-					'ufCrm6_1717069419772' => $request['visitId']
-				]
-			]
-		);
-		$statuses = [
-			'reserved' => 'DT133_10:NEW',
-			'completed' => 'DT133_10:SUCCESS',
-			'cancelled' => 'DT133_10:FAIL',
-		];
-		$policies = [
-			'policy' => '58',
-			'contract' => '59',
-			'cash' => '60',
-		];
-		$fields = [
-			'contactId' => $contactId,
-			'PARENT_ID_191' => $doctorId,
-			// 'PARENT_ID_152' => $sugVisitId,
-			'PARENT_ID_159' => $specialityId,
-			'PARENT_ID_172' => $cabinetId,
-			'stageId' => $statuses[$request['status']],
-			'ufCrm6_1717069419772' => $request['visitId'],
-			'ufCrm6_1717069427922' => $request['timeslotId'],
-			'ufCrm6_1717069989709' => $request['startDateTime'],
-			'ufCrm6_1717070013542' => $request['endDateTime'],
-			'ufCrm6_1717069911400' => $request['userIdCreaterVisit'],
-			'ufCrm6_1717757159930' => $request['userIdPaidVisit'],
-			'begindate' => $request['visitCreateDateTime'],
-			'closedate' => $request['visitCancelDateTime'],
-			'ufCrm6_1717075348543' => $policies[$request['paymentType']],
-			'ufCrm6_1717756581518' => $request['policyId'],
-			'ufCrm6_1717757774625' => $request['policyNumber'],
-			'ufCrm6_1717756615624' => $request['policyStartDate'],
-			'ufCrm6_1717756629307' => $request['policyEndDate'],
-			'ufCrm6_1717756761823' => $request['companyId'],
-			'ufCrm6_1717756772642' => $request['company'],
-			'ufCrm6_1717756837171' => $request['contractId'],
-			'ufCrm6_1717756869464' => $request['contractNumber'],
-			'ufCrm6_1717756884255' => $request['contractStartDate'],
-			'ufCrm6_1717756900527' => $request['contractEndDate'],
-			'ufCrm6_1717756905956' => $request['branchId'],
-			'ufCrm6_1717756914479' => $request['branch'],
-		];
-		if($instanceList['total'] == 0) {
-			$res = $this->call(
-				'crm.item.add',
+		try {
+			$contactId = $this->updateContact($request);
+			$doctorId = $this->updateDoctor($request);
+			$specialityId = $this->updateSpeciality($request);
+			$cabinetId = $this->updateCabinet($request);
+	
+			$instanceList  = $this->call(
+				'crm.item.list',
 				[
 					"entityTypeId" => 133,
-					'fields' => $fields
+					'filter' => [
+						'ufCrm6_1717069419772' => $request['visitId']
+					]
 				]
 			);
-			$id = $res['result'];
-		}
-		if($instanceList['total'] != 0) {
-			$this->call(
-				'crm.item.update',
-				[
-					"entityTypeId" => 133,
-					'id'=>$instanceList['result']['items'][0]['id'],
-					'fields' => $fields
-				]
-			);
-			$id = $instanceList['result']['items'][0]['id'];
+			$statuses = [
+				'reserved' => 'DT133_10:NEW',
+				'completed' => 'DT133_10:SUCCESS',
+				'cancelled' => 'DT133_10:FAIL',
+			];
+			$policies = [
+				'policy' => '58',
+				'contract' => '59',
+				'cash' => '60',
+			];
+			$fields = [
+				'contactId' => $contactId,
+				'PARENT_ID_191' => $doctorId,
+				// 'PARENT_ID_152' => $sugVisitId,
+				'PARENT_ID_159' => $specialityId,
+				'PARENT_ID_172' => $cabinetId,
+				'stageId' => $statuses[$request['status']],
+				'ufCrm6_1717069419772' => $request['visitId'],
+				'ufCrm6_1717069427922' => $request['timeslotId'],
+				'ufCrm6_1717069989709' => $request['startDateTime'],
+				'ufCrm6_1717070013542' => $request['endDateTime'],
+				'ufCrm6_1717069911400' => $request['userIdCreaterVisit'],
+				'ufCrm6_1717757159930' => $request['userIdPaidVisit'],
+				'begindate' => $request['visitCreateDateTime'],
+				'closedate' => $request['visitCancelDateTime'],
+				'ufCrm6_1717075348543' => $policies[$request['paymentType']],
+				'ufCrm6_1717756581518' => $request['policyId'],
+				'ufCrm6_1717757774625' => $request['policyNumber'],
+				'ufCrm6_1717756615624' => $request['policyStartDate'],
+				'ufCrm6_1717756629307' => $request['policyEndDate'],
+				'ufCrm6_1717756761823' => $request['companyId'],
+				'ufCrm6_1717756772642' => $request['company'],
+				'ufCrm6_1717756837171' => $request['contractId'],
+				'ufCrm6_1717756869464' => $request['contractNumber'],
+				'ufCrm6_1717756884255' => $request['contractStartDate'],
+				'ufCrm6_1717756900527' => $request['contractEndDate'],
+				'ufCrm6_1717756905956' => $request['branchId'],
+				'ufCrm6_1717756914479' => $request['branch'],
+			];
+			if($instanceList['total'] == 0) {
+				$res = $this->call(
+					'crm.item.add',
+					[
+						"entityTypeId" => 133,
+						'fields' => $fields
+					]
+				);
+				$id = $res['result'];
+			}
+			if($instanceList['total'] != 0) {
+				$this->call(
+					'crm.item.update',
+					[
+						"entityTypeId" => 133,
+						'id'=>$instanceList['result']['items'][0]['id'],
+						'fields' => $fields
+					]
+				);
+				$id = $instanceList['result']['items'][0]['id'];
+			}
+	
+			// create services connection
+			if (isset($request['services'])) {
+				$this->updateService($request['services'], $id);
+			}
+			return response()->json(['result' => $id], 200);
+
+		} catch (\Throwable $th) {
+			return response()->json(['message' => $th], 500);
 		}
 
-		// create services connection
-		if (isset($request['services'])) {
-			$this->updateService($request['services'], $id);
-		}
+		log::info('done');
     }
 
 
     public function updateSuggestedVisitRequest(Request $request) 
     {
-
-        $this->updateSuggestedVisit($request);
+		try {
+			$res = $this->updateSuggestedVisit($request);
+			return response()->json(['result' => $res], 200);
+		} catch (\Throwable $th) {
+			return response()->json(['message' => $th], 500);
+		}
     }
     public function updateSuggestedVisit($request) 
     {
@@ -374,13 +375,14 @@ class KaskadController extends Controller
 			'ufCrm6_1717075348543' => $request['paymentType'],
 		];
 		if($instanceList['total'] == 0) {
-			$this->call(
+			$res = $this->call(
 				'crm.item.add',
 				[
 					"entityTypeId" => 152,
 					'fields' => $fields
 				]
 			);
+			$id = $res['result'];
 		}
 		if($instanceList['total'] != 0) {
 			$this->call(
@@ -391,11 +393,19 @@ class KaskadController extends Controller
 					'fields' => $fields
 				]
 			);
+			$id = $instanceList['result']['items'][0]['id'];
 		}
+
+		return $id;
     }
     public function updateDoctorRequest(Request $request) 
     {
-        $this->updateDoctor($request);
+		try {
+			$res = $this->updateDoctor($request);
+			return response()->json(['result' => $res], 200);
+		} catch (\Throwable $th) {
+			return response()->json(['message' => $th], 500);
+		}
     }
     public function updateDoctor($request) 
     {
@@ -437,7 +447,12 @@ class KaskadController extends Controller
     }
     public function updateSpecialityRequest(Request $request) 
     {
-		$this->updateSpeciality($request);
+		try {
+			$res = $this->updateSpeciality($request);
+			return response()->json(['result' => $res], 200);
+		} catch (\Throwable $th) {
+			return response()->json(['message' => $th], 500);
+		}
     }
     public function updateSpeciality($request) 
     {
@@ -479,7 +494,12 @@ class KaskadController extends Controller
     }
     public function updateCabinetRequest(Request $request) 
     {
-		$this->updateCabinet($request);
+		try {
+			$res = $this->updateCabinet($request);
+			return response()->json(['result' => $res], 200);
+		} catch (\Throwable $th) {
+			return response()->json(['message' => $th], 500);
+		}
     }
     public function updateCabinet(Request $request) 
     {
@@ -525,124 +545,130 @@ class KaskadController extends Controller
 
 	public function updateServiceRequest(Request $request) 
     {
-        $this->updateService($request, $request['visitId']);
+		try {
+			$res = $this->updateService($request, $request['visitId']);
+			return response()->json(['result' => $res], 200);
+		} catch (\Throwable $th) {
+			return response()->json(['message' => $th], 500);
+		}
     }
 
 	public function updateService($services, $id)
 	{
-			foreach ($services as $key => $service) {
-				// ?create products in crm form
-				$fields['ufCrm6_1718544720772'][$key] = $service['id'];
-				$fields['ufCrm6_1718544860140'][$key] = $service['code'];
-				$fields['ufCrm6_1718544942772'][$key] = $service['name'];
-				$fields['ufCrm6_1718544969756'][$key] = $service['count'];
-				$fields['ufCrm6_1718544979441'][$key] = $service['price'];
-				$fields['ufCrm6_1718544988309'][$key] = $service['summa'];
-				$fields['ufCrm6_1718544998792'][$key] = $service['summaWithDiscount'];
-	
-				// ?create product
-				$productFields  = $this->call(
-					'crm.item.productrow.fields',
-				);
+		foreach ($services as $key => $service) {
+			// ?create products in crm form
+			$fields['ufCrm6_1718544720772'][$key] = $service['id'];
+			$fields['ufCrm6_1718544860140'][$key] = $service['code'];
+			$fields['ufCrm6_1718544942772'][$key] = $service['name'];
+			$fields['ufCrm6_1718544969756'][$key] = $service['count'];
+			$fields['ufCrm6_1718544979441'][$key] = $service['price'];
+			$fields['ufCrm6_1718544988309'][$key] = $service['summa'];
+			$fields['ufCrm6_1718544998792'][$key] = $service['summaWithDiscount'];
 
-				$productList  = $this->call(
-					'crm.product.list',
-					[
-						'filter' => [
-							'PROPERTY_68' => $service['id'],
-						]
-					]
-				);
-				
-				$productFields = [
-					'NAME' => $service['name'],
-					'PROPERTY_68' => $service['id'],
-					'PROPERTY_71' => $service['count'],
-					'PROPERTY_72' => $service['price'],
-					'PROPERTY_73' => $service['summa'],
-					'PROPERTY_74' => $service['summaWithDiscount'],
-					'PROPERTY_75' => $service['code'],
-				];
-				if($productList['total'] == 0) {
-					$res = $this->call(
-						'crm.product.add',
-						[
-							'fields' => $productFields
-						]
-					);
-					$productId = $productList['result'];
-				}
-				
-				if($productList['total'] != 0) {
-					$res = $this->call(
-						'crm.product.update',
-						[
-							'id'=>$productList['result'][0]['ID'],
-							'fields' => $productFields
-						]
-					);
-					$productId = $productList['result'][0]['ID'];
-				}
-				$productRows[] = [
-					'productId' => $productId,
-					'productName' => $service['name'],
-					'price' => $service['price'],
-					'quantity' => $service['count'],
-				];
+			// ?create product
+			$productFields  = $this->call(
+				'crm.item.productrow.fields',
+			);
 
-				// !create service 
-				// $serviceFields  = $this->call(
-				// 	'catalog.product.service.getFieldsByFilter',
-				// 	[
-				// 		'filter'=> ['iblockId' => 14],
-				// 	]
-				// );
-				// $serviceList  = $this->call(
-				// 	'catalog.product.service.list',
-				// 	[
-				// 		'select' => ['id', 'iblockId'],
-				// 		'filter' => [
-				// 			'iblockId' => 14,
-				// 			'property68' => $service['id'],
-				// 		]
-				// 	]
-				// );
-				// $serviceFields = [
-				// 	'iblockId' => 14,
-				// 	'name' => $service['name'],
-				// 	'property68' => $service['id'],
-				// 	'property69' => $service['code'],
-				// 	'property71' => $service['count'],
-				// 	'property72' => $service['price'],
-				// 	'property73' => $service['summa'],
-				// 	'property74' => $service['summaWithDiscount'],
-				// ];
-				// if($serviceList['total'] == 0) {
-				// 	$this->call(
-				// 		'catalog.product.service.add',
-				// 		[
-				// 			'fields' => $serviceFields
-				// 		]
-				// 	);
-				// }
-				// if($serviceList['total'] != 0) {
-				// 	$this->call(
-				// 		'catalog.product.service.update',
-				// 		[
-				// 			'id'=>$serviceList['result']['services'][0]['id'],
-				// 			'fields' => $serviceFields
-				// 		]
-				// 	);
-				// }
-			}
-			$this->call(
-				'crm.item.productrow.set',
+			$productList  = $this->call(
+				'crm.product.list',
 				[
-					'ownerType' => 'T85',
-					'ownerId' => $id,
-					'productRows' => $productRows,
+					'filter' => [
+						'PROPERTY_68' => $service['id'],
+					]
 				]
 			);
+			
+			$productFields = [
+				'NAME' => $service['name'],
+				'PROPERTY_68' => $service['id'],
+				'PROPERTY_71' => $service['count'],
+				'PROPERTY_72' => $service['price'],
+				'PROPERTY_73' => $service['summa'],
+				'PROPERTY_74' => $service['summaWithDiscount'],
+				'PROPERTY_75' => $service['code'],
+			];
+			if($productList['total'] == 0) {
+				$res = $this->call(
+					'crm.product.add',
+					[
+						'fields' => $productFields
+					]
+				);
+				$productId = $productList['result'];
+			}
+			
+			if($productList['total'] != 0) {
+				$res = $this->call(
+					'crm.product.update',
+					[
+						'id'=>$productList['result'][0]['ID'],
+						'fields' => $productFields
+					]
+				);
+				$productId = $productList['result'][0]['ID'];
+			}
+			$productRows[] = [
+				'productId' => $productId,
+				'productName' => $service['name'],
+				'price' => $service['price'],
+				'quantity' => $service['count'],
+			];
+
+			// !create service 
+			// $serviceFields  = $this->call(
+			// 	'catalog.product.service.getFieldsByFilter',
+			// 	[
+			// 		'filter'=> ['iblockId' => 14],
+			// 	]
+			// );
+			// $serviceList  = $this->call(
+			// 	'catalog.product.service.list',
+			// 	[
+			// 		'select' => ['id', 'iblockId'],
+			// 		'filter' => [
+			// 			'iblockId' => 14,
+			// 			'property68' => $service['id'],
+			// 		]
+			// 	]
+			// );
+			// $serviceFields = [
+			// 	'iblockId' => 14,
+			// 	'name' => $service['name'],
+			// 	'property68' => $service['id'],
+			// 	'property69' => $service['code'],
+			// 	'property71' => $service['count'],
+			// 	'property72' => $service['price'],
+			// 	'property73' => $service['summa'],
+			// 	'property74' => $service['summaWithDiscount'],
+			// ];
+			// if($serviceList['total'] == 0) {
+			// 	$this->call(
+			// 		'catalog.product.service.add',
+			// 		[
+			// 			'fields' => $serviceFields
+			// 		]
+			// 	);
+			// }
+			// if($serviceList['total'] != 0) {
+			// 	$this->call(
+			// 		'catalog.product.service.update',
+			// 		[
+			// 			'id'=>$serviceList['result']['services'][0]['id'],
+			// 			'fields' => $serviceFields
+			// 		]
+			// 	);
+			// }
+		}
+		$this->call(
+			'crm.item.productrow.set',
+			[
+				'ownerType' => 'T85',
+				'ownerId' => $id,
+				'productRows' => $productRows,
+			]
+		);
+		return $productId;
 	}
 
 }
