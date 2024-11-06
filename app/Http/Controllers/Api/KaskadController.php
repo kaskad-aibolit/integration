@@ -180,7 +180,7 @@ class KaskadController extends Controller
 			$res = $this->updateContact($request);
 			return response()->json(['result' => $res], 200);
 		} catch (\Throwable $th) {
-        	return response()->json(['message' => $th], 500);
+			return response()->json(['message' => $th->getMessage()], 500);
 		}
 		
     }
@@ -254,6 +254,9 @@ class KaskadController extends Controller
     public function updateVisit(Request $request)
     {
 		try {
+			if (!isset($request['visitId'])) {
+				throw new \Exception("visitId is required");
+			}
 			$contactId = $this->updateContact($request);
 			$doctorId = $this->updateDoctor($request);
 			$specialityId = $this->updateSpeciality($request);
@@ -354,7 +357,7 @@ class KaskadController extends Controller
 			return response()->json(['result' => $id], 200);
 
 		} catch (\Throwable $th) {
-			return response()->json(['message' => $th], 500);
+			return response()->json(['message' => $th->getMessage()], 500);
 		}
     }
 
@@ -365,12 +368,14 @@ class KaskadController extends Controller
 			$res = $this->updateSuggestedVisit($request);
 			return response()->json(['result' => $res], 200);
 		} catch (\Throwable $th) {
-			return response()->json(['message' => $th], 500);
+			return response()->json(['message' => $th->getMessage()], 500);
 		}
     }
     public function updateSuggestedVisit($request) 
     {
-
+		if (!isset($request['visitId'])) {
+			throw new \Exception("visitId is required");
+		}
         $instanceList  = $this->call(
 			'crm.item.list',
 			[
@@ -415,11 +420,16 @@ class KaskadController extends Controller
 			$res = $this->updateDoctor($request);
 			return response()->json(['result' => $res], 200);
 		} catch (\Throwable $th) {
-			return response()->json(['message' => $th], 500);
+			return response()->json(['message' => $th->getMessage()], 500);
 		}
     }
     public function updateDoctor($request) 
     {
+		log::info('$request');
+		log::info($request);
+		if (!isset($request['doctorId'])) {
+			throw new \Exception("doctorId is required");
+		}
         $instanceList  = $this->call(
 			'crm.item.list',
 			[
@@ -467,11 +477,14 @@ class KaskadController extends Controller
 			$res = $this->updateSpeciality($request);
 			return response()->json(['result' => $res], 200);
 		} catch (\Throwable $th) {
-			return response()->json(['message' => $th], 500);
+			return response()->json(['message' => $th->getMessage()], 500);
 		}
     }
     public function updateSpeciality($request) 
     {
+		if (!isset($request['specialityId'])) {
+			throw new \Exception("specialityId is required");
+		}
         $instanceList  = $this->call(
 			'crm.item.list',
 			[
@@ -514,11 +527,14 @@ class KaskadController extends Controller
 			$res = $this->updateCabinet($request);
 			return response()->json(['result' => $res], 200);
 		} catch (\Throwable $th) {
-			return response()->json(['message' => $th], 500);
+			return response()->json(['message' => $th->getMessage()], 500);
 		}
     }
     public function updateCabinet(Request $request) 
     {
+		if (!isset($request['cabinetID'])) {
+			throw new \Exception("cabinetID is required");
+		}
 		$instanceFields = $this->call(
 			'crm.item.fields',
 			["entityTypeId" => 172]
@@ -565,7 +581,7 @@ class KaskadController extends Controller
 			$res = $this->updateService($request, $request['visitId']);
 			return response()->json(['result' => $res], 200);
 		} catch (\Throwable $th) {
-			return response()->json(['message' => $th], 500);
+			return response()->json(['message' => $th->getMessage()], 500);
 		}
     }
 
