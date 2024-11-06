@@ -244,20 +244,15 @@ class KaskadController extends Controller
 
 	public function example(Request $request) 
 	{
-		log::info('example');
-		log::info($request);
 		$headers = [
 			'Authorization' => 'Bearer a9322698-4171-4409-a429-0b24012ad25e',
 			'Accept' => 'application/json',
 		];
 		$response = Http::withHeaders($headers)->get('http://127.0.0.1:8001/api/update/visit');
-		log::info($response);
 	}
 
     public function updateVisit(Request $request)
     {
-		log::info('updateVisit');
-		log::info($request);
 		try {
 			$contactId = $this->updateContact($request);
 			$doctorId = $this->updateDoctor($request);
@@ -295,22 +290,40 @@ class KaskadController extends Controller
 				'ufCrm6_1717069989709' => $request['startDateTime'],
 				'ufCrm6_1717070013542' => $request['endDateTime'],
 				'ufCrm6_1717069911400' => $request['userIdCreaterVisit'],
-				'ufCrm6_1717757159930' => $request['userIdPaidVisit'],
 				'begindate' => $request['visitCreateDateTime'],
 				'closedate' => $request['visitCancelDateTime'],
-				'ufCrm6_1717075348543' => $policies[$request['paymentType']],
-				'ufCrm6_1717756581518' => $request['policyId'],
-				'ufCrm6_1717757774625' => $request['policyNumber'],
-				'ufCrm6_1717756615624' => $request['policyStartDate'],
-				'ufCrm6_1717756629307' => $request['policyEndDate'],
-				'ufCrm6_1717756761823' => $request['companyId'],
-				'ufCrm6_1717756772642' => $request['company'],
-				'ufCrm6_1717756837171' => $request['contractId'],
-				'ufCrm6_1717756869464' => $request['contractNumber'],
-				'ufCrm6_1717756884255' => $request['contractStartDate'],
-				'ufCrm6_1717756900527' => $request['contractEndDate'],
 				'ufCrm6_1717756905956' => $request['branchId'],
 				'ufCrm6_1717756914479' => $request['branch'],
+
+				'ufCrm6_1717075348543' => $policies[$request['checks'][0]['paymentType']],
+				'ufCrm6_1717756581518' => $request['checks'][0]['policyId'],
+				'ufCrm6_1717757774625' => $request['checks'][0]['policyNumber'],
+				'ufCrm6_1717756615624' => $request['checks'][0]['policyStartDate'],
+				'ufCrm6_1717756629307' => $request['checks'][0]['policyEndDate'],
+				'ufCrm6_1717756761823' => $request['checks'][0]['companyId'],
+				'ufCrm6_1717756772642' => $request['checks'][0]['company'],
+				'ufCrm6_1717756837171' => $request['checks'][0]['contractId'],
+				'ufCrm6_1717756869464' => $request['checks'][0]['contractNumber'],
+				'ufCrm6_1717756884255' => $request['checks'][0]['contractStartDate'],
+				'ufCrm6_1717756900527' => $request['checks'][0]['contractEndDate'],
+				'ufCrm6_1730923494796' => $request['checks'][0]['summa'],
+				'ufCrm6_1730923506131' => $request['checks'][0]['summaWithDiscont'],
+				'ufCrm6_1717757159930' => $request['checks'][0]['userIdPaidVisit'],
+
+				'ufCrm6_1730922040802' => $policies[$request['checks'][1]['paymentType']],
+				'ufCrm6_1730922063553' => $request['checks'][1]['policyId'],
+				'ufCrm6_1730922076813' => $request['checks'][1]['policyNumber'],
+				'ufCrm6_1730922101664' => $request['checks'][1]['policyStartDate'],
+				'ufCrm6_1730922111930' => $request['checks'][1]['policyEndDate'],
+				'ufCrm6_1730922125590' => $request['checks'][1]['companyId'],
+				'ufCrm6_1730922133793' => $request['checks'][1]['company'],
+				'ufCrm6_1730922160390' => $request['checks'][1]['contractId'],
+				'ufCrm6_1730922175357' => $request['checks'][1]['contractNumber'],
+				'ufCrm6_1730922199444' => $request['checks'][1]['contractStartDate'],
+				'ufCrm6_1730922210555' => $request['checks'][1]['contractEndDate'],
+				'ufCrm6_1730922292531' => $request['checks'][1]['summa'],
+				'ufCrm6_1718544988309' => $request['checks'][1]['summaWithDiscont'],
+				'ufCrm6_1730922233670' => $request['checks'][1]['userIdPaidVisit'],
 			];
 			if($instanceList['total'] == 0) {
 				$res = $this->call(
@@ -335,16 +348,14 @@ class KaskadController extends Controller
 			}
 	
 			// create services connection
-			if (isset($request['services'])) {
-				$this->updateService($request['services'], $id);
-			}
+			// if (isset($request['services'])) {
+			// 	$this->updateService($request['services'], $id);
+			// }
 			return response()->json(['result' => $id], 200);
 
 		} catch (\Throwable $th) {
 			return response()->json(['message' => $th], 500);
 		}
-
-		log::info('done');
     }
 
 
@@ -418,8 +429,13 @@ class KaskadController extends Controller
 				]
 			]
 		);
+		// $instanceFields = $this->call(
+		// 	'crm.item.fields',
+		// 	["entityTypeId" => 191]
+		// );
 		$fields = [
 			'ufCrm3_1717070215888' => $request['doctorId'],
+			'title' => $request['fullName'],
 			'ufCrm3_1704440965' => $request['fullName'],
 		];
 		if($instanceList['total'] == 0) {
