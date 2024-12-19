@@ -12,8 +12,7 @@ class EnsureTokenIsValid
     public function handle($request, Closure $next)
     {
         $token = $request->header('Authorization');
-        $hashedToken = hash('sha256', $token);
-        if ($hashedToken && $hashedToken == '5bcab169940b4e000a4b8be4ed4c3258fe10399f513ef72a5ff2ec1c58d3f836') {
+        if ($token && $token === 'Bearer a9322698-4171-4409-a429-0b24012ad25e') {
             return $next($request);
         }
 

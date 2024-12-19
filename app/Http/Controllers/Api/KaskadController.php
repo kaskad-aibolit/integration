@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api\Kaskad;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Http;
@@ -253,6 +253,8 @@ class KaskadController extends Controller
 
     public function updateVisit(Request $request)
     {
+		log::info('$request');
+		log::info($request);
 		try {
 			if (!isset($request['visitId'])) {
 				throw new \Exception("visitId is required");
@@ -425,7 +427,7 @@ class KaskadController extends Controller
     }
     public function updateDoctor($request) 
     {
-		log::info('$request');
+		log::info('$request doctor');
 		log::info($request);
 		if (!isset($request['doctorId'])) {
 			throw new \Exception("doctorId is required");
