@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Kaskad;
+namespace App\Http\Controllers\Api;
 
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Http;
