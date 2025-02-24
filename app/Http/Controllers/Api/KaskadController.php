@@ -255,7 +255,7 @@ class KaskadController extends Controller
     {
 		log::info('$request');
 		log::info($request);
-		try {
+		// try {
 			if (!isset($request['visitId'])) {
 				throw new \Exception("visitId is required");
 			}
@@ -299,37 +299,40 @@ class KaskadController extends Controller
 				'closedate' => $request['visitCancelDateTime'],
 				'ufCrm6_1717756905956' => $request['branchId'],
 				'ufCrm6_1717756914479' => $request['branch'],
-
-				'ufCrm6_1717075348543' => $policies[$request['checks'][0]['paymentType']],
-				'ufCrm6_1717756581518' => $request['checks'][0]['policyId'],
-				'ufCrm6_1717757774625' => $request['checks'][0]['policyNumber'],
-				'ufCrm6_1717756615624' => $request['checks'][0]['policyStartDate'],
-				'ufCrm6_1717756629307' => $request['checks'][0]['policyEndDate'],
-				'ufCrm6_1717756761823' => $request['checks'][0]['companyId'],
-				'ufCrm6_1717756772642' => $request['checks'][0]['company'],
-				'ufCrm6_1717756837171' => $request['checks'][0]['contractId'],
-				'ufCrm6_1717756869464' => $request['checks'][0]['contractNumber'],
-				'ufCrm6_1717756884255' => $request['checks'][0]['contractStartDate'],
-				'ufCrm6_1717756900527' => $request['checks'][0]['contractEndDate'],
-				'ufCrm6_1730923494796' => $request['checks'][0]['summa'],
-				'ufCrm6_1730923506131' => $request['checks'][0]['summaWithDiscont'],
-				'ufCrm6_1717757159930' => $request['checks'][0]['userIdPaidVisit'],
-
-				'ufCrm6_1730922040802' => $policies[$request['checks'][1]['paymentType']],
-				'ufCrm6_1730922063553' => $request['checks'][1]['policyId'],
-				'ufCrm6_1730922076813' => $request['checks'][1]['policyNumber'],
-				'ufCrm6_1730922101664' => $request['checks'][1]['policyStartDate'],
-				'ufCrm6_1730922111930' => $request['checks'][1]['policyEndDate'],
-				'ufCrm6_1730922125590' => $request['checks'][1]['companyId'],
-				'ufCrm6_1730922133793' => $request['checks'][1]['company'],
-				'ufCrm6_1730922160390' => $request['checks'][1]['contractId'],
-				'ufCrm6_1730922175357' => $request['checks'][1]['contractNumber'],
-				'ufCrm6_1730922199444' => $request['checks'][1]['contractStartDate'],
-				'ufCrm6_1730922210555' => $request['checks'][1]['contractEndDate'],
-				'ufCrm6_1730922292531' => $request['checks'][1]['summa'],
-				'ufCrm6_1718544988309' => $request['checks'][1]['summaWithDiscont'],
-				'ufCrm6_1730922233670' => $request['checks'][1]['userIdPaidVisit'],
+				
 			];
+			if(isset($request['checks'][0])) {
+				$fields['ufCrm6_1717075348543'] = $policies[$request['checks'][0]['paymentType']];
+				$fields['ufCrm6_1717756581518'] = $request['checks'][0]['policyId'];
+				$fields['ufCrm6_1717757774625'] = $request['checks'][0]['policyNumber'];
+				$fields['ufCrm6_1717756615624'] = $request['checks'][0]['policyStartDate'];
+				$fields['ufCrm6_1717756629307'] = $request['checks'][0]['policyEndDate'];
+				$fields['ufCrm6_1717756761823'] = $request['checks'][0]['companyId'];
+				$fields['ufCrm6_1717756772642'] = $request['checks'][0]['company'];
+				$fields['ufCrm6_1717756837171'] = $request['checks'][0]['contractId'];
+				$fields['ufCrm6_1717756869464'] = $request['checks'][0]['contractNumber'];
+				$fields['ufCrm6_1717756884255'] = $request['checks'][0]['contractStartDate'];
+				$fields['ufCrm6_1717756900527'] = $request['checks'][0]['contractEndDate'];
+				$fields['ufCrm6_1730923494796'] = $request['checks'][0]['summa'];
+				$fields['ufCrm6_1730923506131'] = $request['checks'][0]['summaWithDiscont'];
+				$fields['ufCrm6_1717757159930'] = $request['checks'][0]['userIdPaidVisit'];
+			}
+			if(isset($request['checks']) && count($request['checks']) > 1) {
+				$fields['ufCrm6_1730922040802'] = $policies[$request['checks'][1]['paymentType']];
+				$fields['ufCrm6_1730922063553'] = $request['checks'][1]['policyId'];
+				$fields['ufCrm6_1730922076813'] = $request['checks'][1]['policyNumber'];
+				$fields['ufCrm6_1730922101664'] = $request['checks'][1]['policyStartDate'];
+				$fields['ufCrm6_1730922111930'] = $request['checks'][1]['policyEndDate'];
+				$fields['ufCrm6_1730922125590'] = $request['checks'][1]['companyId'];
+				$fields['ufCrm6_1730922133793'] = $request['checks'][1]['company'];
+				$fields['ufCrm6_1730922160390'] = $request['checks'][1]['contractId'];
+				$fields['ufCrm6_1730922175357'] = $request['checks'][1]['contractNumber'];
+				$fields['ufCrm6_1730922199444'] = $request['checks'][1]['contractStartDate'];
+				$fields['ufCrm6_1730922210555'] = $request['checks'][1]['contractEndDate'];
+				$fields['ufCrm6_1730922292531'] = $request['checks'][1]['summa'];
+				$fields['ufCrm6_1718544988309'] = $request['checks'][1]['summaWithDiscont'];
+				$fields['ufCrm6_1730922233670'] = $request['checks'][1]['userIdPaidVisit'];
+			}
 			if($instanceList['total'] == 0) {
 				$res = $this->call(
 					'crm.item.add',
@@ -358,9 +361,9 @@ class KaskadController extends Controller
 			// }
 			return response()->json(['result' => $id], 200);
 
-		} catch (\Throwable $th) {
-			return response()->json(['message' => $th->getMessage()], 500);
-		}
+		// } catch (\Throwable $th) {
+		// 	return response()->json(['message' => $th->getMessage()], 500);
+		// }
     }
 
 
