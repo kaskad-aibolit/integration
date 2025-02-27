@@ -253,9 +253,10 @@ class KaskadController extends Controller
 
     public function updateVisit(Request $request)
     {
+
 		log::info('$request');
 		log::info($request);
-		// try {
+		try {
 			if (!isset($request['visitId'])) {
 				throw new \Exception("visitId is required");
 			}
@@ -333,6 +334,24 @@ class KaskadController extends Controller
 				$fields['ufCrm6_1718544988309'] = $request['checks'][1]['summaWithDiscont'];
 				$fields['ufCrm6_1730922233670'] = $request['checks'][1]['userIdPaidVisit'];
 			}
+			if(isset($request['services']) && count($request['services']) > 0) {
+				// Initialize arrays for each field using lowercase prefix to match other fields
+				$fields['ufCrm6_1718544860140'] = [];
+				$fields['ufCrm6_1718544942772'] = [];
+				$fields['ufCrm6_1740684976081'] = [];
+				$fields['ufCrm6_1718544969756'] = [];
+				$fields['ufCrm6_1740685101111'] = [];
+				$fields['ufCrm6_1740685117182'] = [];
+
+				foreach ($request['services'] as $key => $service) {
+					$fields['ufCrm6_1718544860140'][$key] = $service['code'];
+					$fields['ufCrm6_1718544942772'][$key] = $service['name'];
+					$fields['ufCrm6_1740684976081'][$key] = $service['price'];
+					$fields['ufCrm6_1718544969756'][$key] = $service['count'];
+					$fields['ufCrm6_1740685101111'][$key] = $service['summa'];
+					$fields['ufCrm6_1740685117182'][$key] = $service['summaWithDiscount'];
+				}
+			}
 			if($instanceList['total'] == 0) {
 				$res = $this->call(
 					'crm.item.add',
@@ -356,14 +375,14 @@ class KaskadController extends Controller
 			}
 	
 			// create services connection
-			// if (isset($request['services'])) {
-			// 	$this->updateService($request['services'], $id);
-			// }
+			if (isset($request['services'])) {
+				$this->updateService($request['services'], $id);
+			}
 			return response()->json(['result' => $id], 200);
 
-		// } catch (\Throwable $th) {
-		// 	return response()->json(['message' => $th->getMessage()], 500);
-		// }
+		} catch (\Throwable $th) {
+			return response()->json(['message' => $th->getMessage()], 500);
+		}
     }
 
 
@@ -430,8 +449,6 @@ class KaskadController extends Controller
     }
     public function updateDoctor($request) 
     {
-		log::info('$request doctor');
-		log::info($request);
 		if (!isset($request['doctorId'])) {
 			throw new \Exception("doctorId is required");
 		}
@@ -651,51 +668,6 @@ class KaskadController extends Controller
 				'price' => $service['price'],
 				'quantity' => $service['count'],
 			];
-
-			// !create service 
-			// $serviceFields  = $this->call(
-			// 	'catalog.product.service.getFieldsByFilter',
-			// 	[
-			// 		'filter'=> ['iblockId' => 14],
-			// 	]
-			// );
-			// $serviceList  = $this->call(
-			// 	'catalog.product.service.list',
-			// 	[
-			// 		'select' => ['id', 'iblockId'],
-			// 		'filter' => [
-			// 			'iblockId' => 14,
-			// 			'property68' => $service['id'],
-			// 		]
-			// 	]
-			// );
-			// $serviceFields = [
-			// 	'iblockId' => 14,
-			// 	'name' => $service['name'],
-			// 	'property68' => $service['id'],
-			// 	'property69' => $service['code'],
-			// 	'property71' => $service['count'],
-			// 	'property72' => $service['price'],
-			// 	'property73' => $service['summa'],
-			// 	'property74' => $service['summaWithDiscount'],
-			// ];
-			// if($serviceList['total'] == 0) {
-			// 	$this->call(
-			// 		'catalog.product.service.add',
-			// 		[
-			// 			'fields' => $serviceFields
-			// 		]
-			// 	);
-			// }
-			// if($serviceList['total'] != 0) {
-			// 	$this->call(
-			// 		'catalog.product.service.update',
-			// 		[
-			// 			'id'=>$serviceList['result']['services'][0]['id'],
-			// 			'fields' => $serviceFields
-			// 		]
-			// 	);
-			// }
 		}
 		$this->call(
 			'crm.item.productrow.set',
