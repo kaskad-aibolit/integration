@@ -300,6 +300,8 @@ class KaskadController extends Controller
 				'closedate' => $request['visitCancelDateTime'],
 				'ufCrm6_1717756905956' => $request['branchId'],
 				'ufCrm6_1717756914479' => $request['branch'],
+				'ufCrm6_1740738765251' => $request['userNameCreaterVisit'],
+				'ufCrm6_1740738932368' => $request['userTypeCreaterVisit'],
 				
 			];
 			if(isset($request['checks'][0])) {
