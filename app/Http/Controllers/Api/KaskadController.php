@@ -301,7 +301,7 @@ class KaskadController extends Controller
 				'ufCrm6_1717756905956' => $request['branchId'],
 				'ufCrm6_1717756914479' => $request['branch'],
 				'ufCrm6_1740738765251' => $request['userNameCreaterVisit'],
-				'ufCrm6_1740738932368' => $request['userTypeCreaterVisit'],
+				'ufCrm6_1740738932368' => $request['userTypeCreateVisit'],
 				
 			];
 			if(isset($request['checks'][0])) {
