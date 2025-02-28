@@ -256,7 +256,7 @@ class KaskadController extends Controller
 
 		log::info('$request');
 		log::info($request);
-		try {
+		// try {
 			if (!isset($request['visitId'])) {
 				throw new \Exception("visitId is required");
 			}
@@ -346,12 +346,12 @@ class KaskadController extends Controller
 				$fields['ufCrm6_1740685117182'] = [];
 
 				foreach ($request['services'] as $key => $service) {
-					$fields['ufCrm6_1718544860140'][$key] = $service['code'];
-					$fields['ufCrm6_1718544942772'][$key] = $service['name'];
-					$fields['ufCrm6_1740684976081'][$key] = $service['price'];
-					$fields['ufCrm6_1718544969756'][$key] = $service['count'];
-					$fields['ufCrm6_1740685101111'][$key] = $service['summa'];
-					$fields['ufCrm6_1740685117182'][$key] = $service['summaWithDiscount'];
+					$fields['ufCrm6_1718544860140'][$key] = $service['code'] ?? null;
+					$fields['ufCrm6_1718544942772'][$key] = $service['name'] ?? null;
+					$fields['ufCrm6_1740684976081'][$key] = $service['price'] ?? null;
+					$fields['ufCrm6_1718544969756'][$key] = $service['count'] ?? null;
+					$fields['ufCrm6_1740685101111'][$key] = $service['summa'] ?? null;
+					$fields['ufCrm6_1740685117182'][$key] = $service['summaWithDiscount'] ?? null;
 				}
 			}
 			if($instanceList['total'] == 0) {
@@ -382,9 +382,9 @@ class KaskadController extends Controller
 			}
 			return response()->json(['result' => $id], 200);
 
-		} catch (\Throwable $th) {
-			return response()->json(['message' => $th->getMessage()], 500);
-		}
+		// } catch (\Throwable $th) {
+		// 	return response()->json(['message' => $th->getMessage()], 500);
+		// }
     }
 
 
@@ -612,16 +612,6 @@ class KaskadController extends Controller
 	public function updateService($services, $id)
 	{
 		foreach ($services as $key => $service) {
-			// ?create products in crm form
-			$fields['ufCrm6_1718544720772'][$key] = $service['id'];
-			$fields['ufCrm6_1718544860140'][$key] = $service['code'];
-			$fields['ufCrm6_1718544942772'][$key] = $service['name'];
-			$fields['ufCrm6_1718544969756'][$key] = $service['count'];
-			$fields['ufCrm6_1718544979441'][$key] = $service['price'];
-			$fields['ufCrm6_1718544988309'][$key] = $service['summa'];
-			$fields['ufCrm6_1718544998792'][$key] = $service['summaWithDiscount'];
-
-			// ?create product
 			$productFields  = $this->call(
 				'crm.item.productrow.fields',
 			);
@@ -630,19 +620,19 @@ class KaskadController extends Controller
 				'crm.product.list',
 				[
 					'filter' => [
-						'PROPERTY_68' => $service['id'],
+						'PROPERTY_68' => $service['id'] ?? null,
 					]
 				]
 			);
 			
 			$productFields = [
-				'NAME' => $service['name'],
-				'PROPERTY_68' => $service['id'],
-				'PROPERTY_71' => $service['count'],
-				'PROPERTY_72' => $service['price'],
-				'PROPERTY_73' => $service['summa'],
-				'PROPERTY_74' => $service['summaWithDiscount'],
-				'PROPERTY_75' => $service['code'],
+				'NAME' => $service['name'] ?? null,
+				'PROPERTY_68' => $service['id'] ?? null,
+				'PROPERTY_71' => $service['count'] ?? null,
+				'PROPERTY_72' => $service['price'] ?? null,
+				'PROPERTY_73' => $service['summa'] ?? null,
+				'PROPERTY_74' => $service['summaWithDiscount'] ?? null,
+				'PROPERTY_75' => $service['code'] ?? null,
 			];
 			if($productList['total'] == 0) {
 				$res = $this->call(
@@ -666,9 +656,9 @@ class KaskadController extends Controller
 			}
 			$productRows[] = [
 				'productId' => $productId,
-				'productName' => $service['name'],
-				'price' => $service['price'],
-				'quantity' => $service['count'],
+				'productName' => $service['name'] ?? null,
+				'price' => $service['price'] ?? null,
+				'quantity' => $service['count'] ?? null,
 			];
 		}
 		$this->call(
