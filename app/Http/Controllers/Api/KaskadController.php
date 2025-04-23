@@ -259,22 +259,22 @@ class KaskadController extends Controller
 			if (!isset($request['visitId'])) {
 				throw new \Exception("visitId is required");
 			}
-			// $contactId = $this->updateContact($request);
-			// $end = microtime(true);
-			// log::info('update contact time: ' . ($end - $start));
-			// $start = microtime(true);
-			// $doctorId = $this->updateDoctor($request);
-			// $end = microtime(true);
-			// log::info('update doctor time: ' . ($end - $start));
-			// $start = microtime(true);
-			// $specialityId = $this->updateSpeciality($request);
-			// $end = microtime(true);
-			// log::info('update speciality time: ' . ($end - $start));
-			// $start = microtime(true);
-			// $cabinetId = $this->updateCabinet($request);
-			// $end = microtime(true);
-			// log::info('update cabinet time: ' . ($end - $start));
+			$contactId = $this->updateContact($request);
+			$end = microtime(true) - $start;
+			log::info('update contact time: ' . $end);
 			$start = microtime(true);
+			$doctorId = $this->updateDoctor($request);
+			$end = microtime(true) - $start;
+			log::info('update doctor time: ' . $end);
+			$start = microtime(true);
+			$specialityId = $this->updateSpeciality($request);
+			$end = microtime(true) - $start;
+			log::info('update speciality time: ' . $end);
+			$start = microtime(true);
+			$cabinetId = $this->updateCabinet($request);
+			$end = microtime(true) - $start;
+			log::info('update cabinet time: ' . $end);
+			
 			$instanceList  = $this->call(
 				'crm.item.list',
 				[
@@ -298,11 +298,11 @@ class KaskadController extends Controller
 				'cash' => '60',
 			];
 			$fields = [
-				// 'contactId' => $contactId,
-				// 'PARENT_ID_191' => $doctorId,
+				'contactId' => $contactId,
+				'PARENT_ID_191' => $doctorId,
 				// 'PARENT_ID_152' => $sugVisitId,
-				// 'PARENT_ID_159' => $specialityId,
-				// 'PARENT_ID_172' => $cabinetId,
+				'PARENT_ID_159' => $specialityId,
+				'PARENT_ID_172' => $cabinetId,
 				'stageId' => $statuses[$request['status']],
 				'ufCrm6_1717069419772' => $request['visitId'],
 				'ufCrm6_1717069427922' => $request['timeslotId'],
