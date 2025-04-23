@@ -254,9 +254,8 @@ class KaskadController extends Controller
     public function updateVisit(Request $request)
     {
 
-		log::info('$request');
-		log::info($request);
-		// try {
+		try {
+			$start = microtime(true);
 			if (!isset($request['visitId'])) {
 				throw new \Exception("visitId is required");
 			}
@@ -274,6 +273,9 @@ class KaskadController extends Controller
 					]
 				]
 			);
+			$end = microtime(true);
+			log::info('get list time: ' . ($end - $start));
+			$start = microtime(true);
 			$statuses = [
 				'reserved' => 'DT133_10:NEW',
 				'completed' => 'DT133_10:SUCCESS',
@@ -375,16 +377,21 @@ class KaskadController extends Controller
 				);
 				$id = $instanceList['result']['items'][0]['id'];
 			}
+			$end = microtime(true);
+			log::info('update visit time: ' . ($end - $start));
 	
 			// create services connection
 			if (isset($request['services'])) {
+				$start = microtime(true);
 				$this->updateService($request['services'], $id);
+				$end = microtime(true);
+				log::info('update service time: ' . ($end - $start));
 			}
 			return response()->json(['result' => $id], 200);
 
-		// } catch (\Throwable $th) {
-		// 	return response()->json(['message' => $th->getMessage()], 500);
-		// }
+		} catch (\Throwable $th) {
+			return response()->json(['message' => $th->getMessage()], 500);
+		}
     }
 
 
