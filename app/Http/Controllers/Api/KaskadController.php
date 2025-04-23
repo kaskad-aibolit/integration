@@ -273,7 +273,7 @@ class KaskadController extends Controller
 			// $start = microtime(true);
 			// $cabinetId = $this->updateCabinet($request);
 			// $end = microtime(true);
-			log::info('update cabinet time: ' . ($end - $start));
+			// log::info('update cabinet time: ' . ($end - $start));
 			$start = microtime(true);
 			$instanceList  = $this->call(
 				'crm.item.list',
@@ -298,11 +298,11 @@ class KaskadController extends Controller
 				'cash' => '60',
 			];
 			$fields = [
-				'contactId' => $contactId,
-				'PARENT_ID_191' => $doctorId,
+				// 'contactId' => $contactId,
+				// 'PARENT_ID_191' => $doctorId,
 				// 'PARENT_ID_152' => $sugVisitId,
-				'PARENT_ID_159' => $specialityId,
-				'PARENT_ID_172' => $cabinetId,
+				// 'PARENT_ID_159' => $specialityId,
+				// 'PARENT_ID_172' => $cabinetId,
 				'stageId' => $statuses[$request['status']],
 				'ufCrm6_1717069419772' => $request['visitId'],
 				'ufCrm6_1717069427922' => $request['timeslotId'],
