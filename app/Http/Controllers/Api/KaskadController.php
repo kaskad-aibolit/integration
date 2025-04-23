@@ -253,156 +253,185 @@ class KaskadController extends Controller
 
     public function updateVisit(Request $request)
     {
+        try {
+            if (!isset($request['visitId'])) {
+                throw new \Exception("visitId is required");
+            }
+            
+            // Create a copy of the request data to use for background processing
+            $requestData = $request->all();
+            
+            // Store $this for use in the closure
+            $self = $this;
+            
+            // Return response immediately
+            $response = response()->json(['result' => 'Processing started', 'visitId' => $request['visitId']], 200);
+            
+            // Process in background after response is sent
+            register_shutdown_function(function() use ($requestData, $self) {
+                try {
+                    $start = microtime(true);
+                    $request = new Request($requestData);
+                    
+                    $contactId = $self->updateContact($request);
+                    $end = microtime(true) - $start;
+                    log::info('update contact time: ' . $end);
+                    
+                    $start = microtime(true);
+                    $doctorId = $self->updateDoctor($request);
+                    $end = microtime(true) - $start;
+                    log::info('update doctor time: ' . $end);
+                    
+                    $start = microtime(true);
+                    $specialityId = $self->updateSpeciality($request);
+                    $end = microtime(true) - $start;
+                    log::info('update speciality time: ' . $end);
+                    
+                    $start = microtime(true);
+                    $cabinetId = $self->updateCabinet($request);
+                    $end = microtime(true) - $start;
+                    log::info('update cabinet time: ' . $end);
+                    
+                    $instanceList = $self->call(
+                        'crm.item.list',
+                        [
+                            "entityTypeId" => 133,
+                            'filter' => [
+                                'ufCrm6_1717069419772' => $request['visitId']
+                            ]
+                        ]
+                    );
+                    $end = microtime(true);
+                    log::info('get list time: ' . ($end - $start));
+                    $start = microtime(true);
+                    
+                    $statuses = [
+                        'reserved' => 'DT133_10:NEW',
+                        'completed' => 'DT133_10:SUCCESS',
+                        'cancelled' => 'DT133_10:FAIL',
+                    ];
+                    $policies = [
+                        'policy' => '58',
+                        'contract' => '59',
+                        'cash' => '60',
+                    ];
+                    $fields = [
+                        'contactId' => $contactId,
+                        'PARENT_ID_191' => $doctorId,
+                        // 'PARENT_ID_152' => $sugVisitId,
+                        'PARENT_ID_159' => $specialityId,
+                        'PARENT_ID_172' => $cabinetId,
+                        'stageId' => $statuses[$request['status']],
+                        'ufCrm6_1717069419772' => $request['visitId'],
+                        'ufCrm6_1717069427922' => $request['timeslotId'],
+                        'ufCrm6_1717069989709' => $request['startDateTime'],
+                        'ufCrm6_1717070013542' => $request['endDateTime'],
+                        'ufCrm6_1717069911400' => $request['userIdCreaterVisit'],
+                        'begindate' => $request['visitCreateDateTime'],
+                        'closedate' => $request['visitCancelDateTime'],
+                        'ufCrm6_1717756905956' => $request['branchId'],
+                        'ufCrm6_1717756914479' => $request['branch'],
+                        'ufCrm6_1740738765251' => $request['userNameCreaterVisit'],
+                        'ufCrm6_1740738932368' => $request['userTypeCreateVisit'],
+                    ];
+                    
+                    if(isset($request['checks'][0])) {
+                        $fields['ufCrm6_1717075348543'] = $policies[$request['checks'][0]['paymentType']];
+                        $fields['ufCrm6_1717756581518'] = $request['checks'][0]['policyId'];
+                        $fields['ufCrm6_1717757774625'] = $request['checks'][0]['policyNumber'];
+                        $fields['ufCrm6_1717756615624'] = $request['checks'][0]['policyStartDate'];
+                        $fields['ufCrm6_1717756629307'] = $request['checks'][0]['policyEndDate'];
+                        $fields['ufCrm6_1717756761823'] = $request['checks'][0]['companyId'];
+                        $fields['ufCrm6_1717756772642'] = $request['checks'][0]['company'];
+                        $fields['ufCrm6_1717756837171'] = $request['checks'][0]['contractId'];
+                        $fields['ufCrm6_1717756869464'] = $request['checks'][0]['contractNumber'];
+                        $fields['ufCrm6_1717756884255'] = $request['checks'][0]['contractStartDate'];
+                        $fields['ufCrm6_1717756900527'] = $request['checks'][0]['contractEndDate'];
+                        $fields['ufCrm6_1730923494796'] = $request['checks'][0]['summa'];
+                        $fields['ufCrm6_1730923506131'] = $request['checks'][0]['summaWithDiscont'];
+                        $fields['ufCrm6_1717757159930'] = $request['checks'][0]['userIdPaidVisit'];
+                    }
+                    
+                    if(isset($request['checks']) && count($request['checks']) > 1) {
+                        $fields['ufCrm6_1730922040802'] = $policies[$request['checks'][1]['paymentType']];
+                        $fields['ufCrm6_1730922063553'] = $request['checks'][1]['policyId'];
+                        $fields['ufCrm6_1730922076813'] = $request['checks'][1]['policyNumber'];
+                        $fields['ufCrm6_1730922101664'] = $request['checks'][1]['policyStartDate'];
+                        $fields['ufCrm6_1730922111930'] = $request['checks'][1]['policyEndDate'];
+                        $fields['ufCrm6_1730922125590'] = $request['checks'][1]['companyId'];
+                        $fields['ufCrm6_1730922133793'] = $request['checks'][1]['company'];
+                        $fields['ufCrm6_1730922160390'] = $request['checks'][1]['contractId'];
+                        $fields['ufCrm6_1730922175357'] = $request['checks'][1]['contractNumber'];
+                        $fields['ufCrm6_1730922199444'] = $request['checks'][1]['contractStartDate'];
+                        $fields['ufCrm6_1730922210555'] = $request['checks'][1]['contractEndDate'];
+                        $fields['ufCrm6_1730922292531'] = $request['checks'][1]['summa'];
+                        $fields['ufCrm6_1718544988309'] = $request['checks'][1]['summaWithDiscont'];
+                        $fields['ufCrm6_1730922233670'] = $request['checks'][1]['userIdPaidVisit'];
+                    }
+                    
+                    if(isset($request['services']) && count($request['services']) > 0) {
+                        // Initialize arrays for each field using lowercase prefix to match other fields
+                        $fields['ufCrm6_1718544860140'] = [];
+                        $fields['ufCrm6_1718544942772'] = [];
+                        $fields['ufCrm6_1740684976081'] = [];
+                        $fields['ufCrm6_1718544969756'] = [];
+                        $fields['ufCrm6_1740685101111'] = [];
+                        $fields['ufCrm6_1740685117182'] = [];
 
-		try {
-			$start = microtime(true);
-			if (!isset($request['visitId'])) {
-				throw new \Exception("visitId is required");
-			}
-			$contactId = $this->updateContact($request);
-			$end = microtime(true) - $start;
-			log::info('update contact time: ' . $end);
-			$start = microtime(true);
-			$doctorId = $this->updateDoctor($request);
-			$end = microtime(true) - $start;
-			log::info('update doctor time: ' . $end);
-			$start = microtime(true);
-			$specialityId = $this->updateSpeciality($request);
-			$end = microtime(true) - $start;
-			log::info('update speciality time: ' . $end);
-			$start = microtime(true);
-			$cabinetId = $this->updateCabinet($request);
-			$end = microtime(true) - $start;
-			log::info('update cabinet time: ' . $end);
-			
-			$instanceList  = $this->call(
-				'crm.item.list',
-				[
-					"entityTypeId" => 133,
-					'filter' => [
-						'ufCrm6_1717069419772' => $request['visitId']
-					]
-				]
-			);
-			$end = microtime(true);
-			log::info('get list time: ' . ($end - $start));
-			$start = microtime(true);
-			$statuses = [
-				'reserved' => 'DT133_10:NEW',
-				'completed' => 'DT133_10:SUCCESS',
-				'cancelled' => 'DT133_10:FAIL',
-			];
-			$policies = [
-				'policy' => '58',
-				'contract' => '59',
-				'cash' => '60',
-			];
-			$fields = [
-				'contactId' => $contactId,
-				'PARENT_ID_191' => $doctorId,
-				// 'PARENT_ID_152' => $sugVisitId,
-				'PARENT_ID_159' => $specialityId,
-				'PARENT_ID_172' => $cabinetId,
-				'stageId' => $statuses[$request['status']],
-				'ufCrm6_1717069419772' => $request['visitId'],
-				'ufCrm6_1717069427922' => $request['timeslotId'],
-				'ufCrm6_1717069989709' => $request['startDateTime'],
-				'ufCrm6_1717070013542' => $request['endDateTime'],
-				'ufCrm6_1717069911400' => $request['userIdCreaterVisit'],
-				'begindate' => $request['visitCreateDateTime'],
-				'closedate' => $request['visitCancelDateTime'],
-				'ufCrm6_1717756905956' => $request['branchId'],
-				'ufCrm6_1717756914479' => $request['branch'],
-				'ufCrm6_1740738765251' => $request['userNameCreaterVisit'],
-				'ufCrm6_1740738932368' => $request['userTypeCreateVisit'],
-				
-			];
-			if(isset($request['checks'][0])) {
-				$fields['ufCrm6_1717075348543'] = $policies[$request['checks'][0]['paymentType']];
-				$fields['ufCrm6_1717756581518'] = $request['checks'][0]['policyId'];
-				$fields['ufCrm6_1717757774625'] = $request['checks'][0]['policyNumber'];
-				$fields['ufCrm6_1717756615624'] = $request['checks'][0]['policyStartDate'];
-				$fields['ufCrm6_1717756629307'] = $request['checks'][0]['policyEndDate'];
-				$fields['ufCrm6_1717756761823'] = $request['checks'][0]['companyId'];
-				$fields['ufCrm6_1717756772642'] = $request['checks'][0]['company'];
-				$fields['ufCrm6_1717756837171'] = $request['checks'][0]['contractId'];
-				$fields['ufCrm6_1717756869464'] = $request['checks'][0]['contractNumber'];
-				$fields['ufCrm6_1717756884255'] = $request['checks'][0]['contractStartDate'];
-				$fields['ufCrm6_1717756900527'] = $request['checks'][0]['contractEndDate'];
-				$fields['ufCrm6_1730923494796'] = $request['checks'][0]['summa'];
-				$fields['ufCrm6_1730923506131'] = $request['checks'][0]['summaWithDiscont'];
-				$fields['ufCrm6_1717757159930'] = $request['checks'][0]['userIdPaidVisit'];
-			}
-			if(isset($request['checks']) && count($request['checks']) > 1) {
-				$fields['ufCrm6_1730922040802'] = $policies[$request['checks'][1]['paymentType']];
-				$fields['ufCrm6_1730922063553'] = $request['checks'][1]['policyId'];
-				$fields['ufCrm6_1730922076813'] = $request['checks'][1]['policyNumber'];
-				$fields['ufCrm6_1730922101664'] = $request['checks'][1]['policyStartDate'];
-				$fields['ufCrm6_1730922111930'] = $request['checks'][1]['policyEndDate'];
-				$fields['ufCrm6_1730922125590'] = $request['checks'][1]['companyId'];
-				$fields['ufCrm6_1730922133793'] = $request['checks'][1]['company'];
-				$fields['ufCrm6_1730922160390'] = $request['checks'][1]['contractId'];
-				$fields['ufCrm6_1730922175357'] = $request['checks'][1]['contractNumber'];
-				$fields['ufCrm6_1730922199444'] = $request['checks'][1]['contractStartDate'];
-				$fields['ufCrm6_1730922210555'] = $request['checks'][1]['contractEndDate'];
-				$fields['ufCrm6_1730922292531'] = $request['checks'][1]['summa'];
-				$fields['ufCrm6_1718544988309'] = $request['checks'][1]['summaWithDiscont'];
-				$fields['ufCrm6_1730922233670'] = $request['checks'][1]['userIdPaidVisit'];
-			}
-			if(isset($request['services']) && count($request['services']) > 0) {
-				// Initialize arrays for each field using lowercase prefix to match other fields
-				$fields['ufCrm6_1718544860140'] = [];
-				$fields['ufCrm6_1718544942772'] = [];
-				$fields['ufCrm6_1740684976081'] = [];
-				$fields['ufCrm6_1718544969756'] = [];
-				$fields['ufCrm6_1740685101111'] = [];
-				$fields['ufCrm6_1740685117182'] = [];
-
-				foreach ($request['services'] as $key => $service) {
-					$fields['ufCrm6_1718544860140'][$key] = $service['code'] ?? null;
-					$fields['ufCrm6_1718544942772'][$key] = $service['name'] ?? null;
-					$fields['ufCrm6_1740684976081'][$key] = $service['price'] ?? null;
-					$fields['ufCrm6_1718544969756'][$key] = $service['count'] ?? null;
-					$fields['ufCrm6_1740685101111'][$key] = $service['summa'] ?? null;
-					$fields['ufCrm6_1740685117182'][$key] = $service['summaWithDiscount'] ?? null;
-				}
-			}
-			if($instanceList['total'] == 0) {
-				$res = $this->call(
-					'crm.item.add',
-					[
-						"entityTypeId" => 133,
-						'fields' => $fields
-					]
-				);
-				$id = $res['result'];
-			}
-			if($instanceList['total'] != 0) {
-				$this->call(
-					'crm.item.update',
-					[
-						"entityTypeId" => 133,
-						'id'=>$instanceList['result']['items'][0]['id'],
-						'fields' => $fields
-					]
-				);
-				$id = $instanceList['result']['items'][0]['id'];
-			}
-			$end = microtime(true);
-			log::info('update visit time: ' . ($end - $start));
-	
-			// create services connection
-			if (isset($request['services'])) {
-				$start = microtime(true);
-				$this->updateService($request['services'], $id);
-				$end = microtime(true);
-				log::info('update service time: ' . ($end - $start));
-			}
-			return response()->json(['result' => $id], 200);
-
-		} catch (\Throwable $th) {
-			return response()->json(['message' => $th->getMessage()], 500);
-		}
+                        foreach ($request['services'] as $key => $service) {
+                            $fields['ufCrm6_1718544860140'][$key] = $service['code'] ?? null;
+                            $fields['ufCrm6_1718544942772'][$key] = $service['name'] ?? null;
+                            $fields['ufCrm6_1740684976081'][$key] = $service['price'] ?? null;
+                            $fields['ufCrm6_1718544969756'][$key] = $service['count'] ?? null;
+                            $fields['ufCrm6_1740685101111'][$key] = $service['summa'] ?? null;
+                            $fields['ufCrm6_1740685117182'][$key] = $service['summaWithDiscount'] ?? null;
+                        }
+                    }
+                    
+                    if($instanceList['total'] == 0) {
+                        $res = $self->call(
+                            'crm.item.add',
+                            [
+                                "entityTypeId" => 133,
+                                'fields' => $fields
+                            ]
+                        );
+                        $id = $res['result'];
+                    }
+                    
+                    if($instanceList['total'] != 0) {
+                        $self->call(
+                            'crm.item.update',
+                            [
+                                "entityTypeId" => 133,
+                                'id'=>$instanceList['result']['items'][0]['id'],
+                                'fields' => $fields
+                            ]
+                        );
+                        $id = $instanceList['result']['items'][0]['id'];
+                    }
+                    
+                    $end = microtime(true);
+                    log::info('update visit time: ' . ($end - $start));
+            
+                    // create services connection
+                    if (isset($request['services'])) {
+                        $start = microtime(true);
+                        $self->updateService($request['services'], $id);
+                        $end = microtime(true);
+                        log::info('update service time: ' . ($end - $start));
+                    }
+                    
+                    log::info('Background processing completed for visitId: ' . $request['visitId']);
+                } catch (\Throwable $th) {
+                    log::error('Background processing error: ' . $th->getMessage());
+                }
+            });
+            
+            return $response;
+        } catch (\Throwable $th) {
+            return response()->json(['message' => $th->getMessage()], 500);
+        }
     }
 
 
