@@ -260,10 +260,21 @@ class KaskadController extends Controller
 				throw new \Exception("visitId is required");
 			}
 			$contactId = $this->updateContact($request);
+			$end = microtime(true);
+			log::info('update contact time: ' . ($end - $start));
+			$start = microtime(true);
 			$doctorId = $this->updateDoctor($request);
+			$end = microtime(true);
+			log::info('update doctor time: ' . ($end - $start));
+			$start = microtime(true);
 			$specialityId = $this->updateSpeciality($request);
+			$end = microtime(true);
+			log::info('update speciality time: ' . ($end - $start));
+			$start = microtime(true);
 			$cabinetId = $this->updateCabinet($request);
-	
+			$end = microtime(true);
+			log::info('update cabinet time: ' . ($end - $start));
+			$start = microtime(true);
 			$instanceList  = $this->call(
 				'crm.item.list',
 				[
