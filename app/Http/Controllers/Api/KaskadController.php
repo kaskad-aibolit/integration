@@ -719,4 +719,8 @@ class KaskadController extends Controller
 		return $productId;
 	}
 
+	public function storePreiskurants(Request $request)
+	{
+		$file = $request->file('file');
+	}
 }

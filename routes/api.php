@@ -22,6 +22,7 @@ Route::post('/example', [App\Http\Controllers\Api\KaskadController::class, 'exam
 
 Route::group(['middleware' => ['auth.api_token']], function () {
     Route::prefix('bitrix24')->group(function () {
+        Route::post('/preiskurant', [App\Http\Controllers\Api\KaskadController::class, 'storePreiskurants']);
         Route::post('/setup', [App\Http\Controllers\Api\KaskadController::class, 'setupBitrix']);
         Route::post('/update/contact', [App\Http\Controllers\Api\KaskadController::class, 'updateContactRequest']);
         Route::post('/update/visit', [App\Http\Controllers\Api\KaskadController::class, 'updateVisit']);
