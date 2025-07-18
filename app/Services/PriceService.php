@@ -73,10 +73,11 @@ class PriceService
             'event' => 'CATALOG.PRICE.ON.UPDATE',
             'handler' => $handlerUrl,
         ]);
-        $this->bitrixService->call('event.bind', [
+        $res = $this->bitrixService->call('event.bind', [
             'event' => 'CATALOG.PRICE.ON.UPDATE',
             'handler' => $handlerUrl,
         ]);
+        log::info('registerPriceUpdateHandler: ' . json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     public function setupBitrix()
