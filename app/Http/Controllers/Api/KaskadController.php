@@ -7,7 +7,8 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use GuzzleHttp\Exception\ClientException;
-use Log;
+use App\Services\PriceService;
+use Illuminate\Support\Facades\Log;
 
 class KaskadController extends Controller
 {
@@ -24,6 +25,13 @@ class KaskadController extends Controller
         "clientId"=> "local.6660467aa43a10.98257669",
         "clientSecret"=> "q4ir2xu0dxZ622CkJ8hkd8Poa1JoWjVdoICnQe0974GGP933UF",
     ];
+
+    protected $priceService;
+
+    public function __construct(PriceService $priceService)
+    {
+        $this->priceService = $priceService;
+    }
 
     public function call($method, $params = [])
 	{
@@ -172,6 +180,11 @@ class KaskadController extends Controller
 				]
 			]
 		);
+
+	    $handlerUrl = config('app.url') . '/api/bitrix/price-update';
+        $this->priceService->registerPriceUpdateHandler($handlerUrl);
+
+
 	}
 
     public function updateContactRequest(Request $request) 
@@ -722,5 +735,9 @@ class KaskadController extends Controller
 	public function storePreiskurants(Request $request)
 	{
 		$file = $request->file('file');
+	}
+
+	public function addHandler(){
+
 	}
 }
