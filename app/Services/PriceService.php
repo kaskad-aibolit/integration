@@ -45,10 +45,10 @@ class PriceService
             'crm.item.list',
             [
                 'entityTypeId' => 1078,
-           
+
             ]
-        );  
-            
+        );
+
 
         // Получаем цену товара отдельным запросом
         $priceRes = $this->bitrixService->call(
@@ -68,7 +68,12 @@ class PriceService
 
     public function registerPriceUpdateHandler($handlerUrl)
     {
-        return $this->bitrixService->call('event.bind', [
+        log::info('registerPriceUpdateHandler: ' . $handlerUrl);
+        $this->bitrixService->call('event.unbind', [
+            'event' => 'CATALOG.PRICE.ON.UPDATE',
+            'handler' => $handlerUrl,
+        ]);
+        $this->bitrixService->call('event.bind', [
             'event' => 'CATALOG.PRICE.ON.UPDATE',
             'handler' => $handlerUrl,
         ]);
@@ -86,4 +91,4 @@ class PriceService
     {
         return 'T' . strtolower(dechex($entityTypeId));
     }
-} 
+}
