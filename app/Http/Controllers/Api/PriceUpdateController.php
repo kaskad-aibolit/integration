@@ -29,8 +29,7 @@ class PriceUpdateController extends Controller
 
     public function registerPriceUpdateHandler(Request $request)
     {
-        // $handlerUrl = config('app.url') . '/api/bitrix/price-update';
-        $handlerUrl = 'https://cnadmindemo.dynamicov.com/api/bitrix/price-update';
+        $handlerUrl = config('app.url') . '/api/bitrix/price-update';
         log::info('handlerUrl: ' . $handlerUrl);
         try {
             $result = $this->priceService->registerPriceUpdateHandler($handlerUrl);
