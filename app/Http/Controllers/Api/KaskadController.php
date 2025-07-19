@@ -261,7 +261,7 @@ class KaskadController extends Controller
 			'Authorization' => 'Bearer a9322698-4171-4409-a429-0b24012ad25e',
 			'Accept' => 'application/json',
 		];
-		$response = Http::withHeaders($headers)->get(config('app.url') . '/api/update/visit');
+		$response = Http::withHeaders($headers)->get('http://127.0.0.1:8003/api/update/visit');
 	}
 
     public function updateVisit(Request $request)
