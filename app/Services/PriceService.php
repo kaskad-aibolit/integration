@@ -55,7 +55,7 @@ class PriceService
             'catalog.price.list',
             [
                 'filter' => [
-                    'productId' => 23408,
+                    'productId' => 23810,
                 ]
             ]
         );
@@ -74,10 +74,20 @@ class PriceService
             'handler' => $handlerUrl,
         ]);
         $res = $this->bitrixService->call('event.bind', [
-            'event' => 'CATALOG.PRICE.ON.UPDATE',
+            'event' => 'ONCRMDYNAMICITEMUPDATE',
             'handler' => $handlerUrl,
         ]);
         log::info('registerPriceUpdateHandler: ' . json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        // log::info('registerPriceUpdateHandler: ' . $handlerUrl);
+        // $this->bitrixService->call('event.unbind', [
+        //     'event' => 'CATALOG.PRICE.ON.UPDATE',
+        //     'handler' => $handlerUrl,
+        // ]);
+        // $res = $this->bitrixService->call('event.bind', [
+        //     'event' => 'CATALOG.PRICE.ON.UPDATE',
+        //     'handler' => $handlerUrl,
+        // ]);
+        // log::info('registerPriceUpdateHandler: ' . json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     public function setupBitrix()
