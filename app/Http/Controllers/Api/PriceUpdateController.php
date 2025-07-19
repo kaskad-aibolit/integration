@@ -20,7 +20,7 @@ class PriceUpdateController extends Controller
     {
         Log::info('Bitrix price update request:', $request->all());
         try {
-            $result = $this->priceService->handlePrice();
+            // $result = $this->priceService->handlePrice();
             // return response()->json(['result' => $result]);
         } catch (\Throwable $e) {
             return response()->json(['error' => $e->getMessage()], 500);
