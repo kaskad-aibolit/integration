@@ -93,7 +93,7 @@ class PriceService
     public function setupBitrix()
     {
         // ... ваша логика по настройке Bitrix ...
-        $handlerUrl = 'http://10.3.4.2:8001/api/bitrix/price-update';
+        $handlerUrl = 'http://10.3.4.2:8002/api/bitrix/price-update';
         $this->registerPriceUpdateHandler($handlerUrl);
     }
 

@@ -24,7 +24,6 @@ Route::post('/example', [App\Http\Controllers\Api\KaskadController::class, 'exam
 Route::get('/add/handler', [App\Http\Controllers\Api\KaskadController::class, 'addHandler']);
 Route::get('/price-update', [App\Http\Controllers\Api\PriceUpdateController::class, 'priceHandle']);
 Route::post('/register-price-update-handler', [PriceUpdateController::class, 'registerPriceUpdateHandler']);
-// Route::post('/bitrix/price-update', [PriceUpdateController::class, 'priceHandle']);
 Route::post('/bitrix/price-update', [PriceUpdateController::class, 'priceHandle'])->withoutMiddleware(['auth.api_token']);
 
 Route::group(['middleware' => ['auth.api_token']], function () {
