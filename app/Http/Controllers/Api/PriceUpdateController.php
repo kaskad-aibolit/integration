@@ -21,10 +21,10 @@ class PriceUpdateController extends Controller
         Log::info('Bitrix price update request:', $request->all());
         try {
             // Временно возвращаем успешный ответ
-            return response()->json(['result' => 'Price update request received successfully']);
+            // return response()->json(['result' => 'Price update request received successfully']);
             
             // Или раскомментируйте, если PriceService готов:
-            // $result = $this->priceService->handlePrice();
+            $result = $this->priceService->handlePrice();
             // return response()->json(['result' => $result]);
         } catch (\Throwable $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -33,7 +33,8 @@ class PriceUpdateController extends Controller
 
     public function registerPriceUpdateHandler(Request $request)
     {
-        $handlerUrl = config('app.url') . '/api/bitrix/price-update';
+        // $handlerUrl = config('app.url') . '/api/bitrix/price-update';
+        $handlerUrl = 'https://bitrix.494.by/api/bitrix/price-update/api/bitrix/price-update';
         log::info('handlerUrl: ' . $handlerUrl);
         try {
             $result = $this->priceService->registerPriceUpdateHandler($handlerUrl);

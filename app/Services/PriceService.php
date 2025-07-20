@@ -17,6 +17,7 @@ class PriceService
     public function handlePrice()
     {
         // Получаем основной элемент смарт-процесса
+        log::info('handlePrice');
         $res = $this->bitrixService->call(
             'crm.item.get',
             [
@@ -69,10 +70,11 @@ class PriceService
     public function registerPriceUpdateHandler($handlerUrl)
     {
         log::info('registerPriceUpdateHandler: ' . $handlerUrl);
-        $this->bitrixService->call('event.unbind', [
-            'event' => 'CATALOG.PRICE.ON.UPDATE',
-            'handler' => $handlerUrl,
-        ]);
+        $res = $this->bitrixService->call(
+            'event.get',
+            []
+        );
+        log::info('events: ' . json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         $res = $this->bitrixService->call('event.bind', [
             'event' => 'ONCRMDYNAMICITEMUPDATE',
             'handler' => $handlerUrl,

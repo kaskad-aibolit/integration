@@ -21,6 +21,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 // Route::get('/login', [App\Http\Controllers\Api\AuthController::class, 'login']);
 Route::post('/example', [App\Http\Controllers\Api\KaskadController::class, 'example']);
+
 Route::get('/add/handler', [App\Http\Controllers\Api\KaskadController::class, 'addHandler']);
 Route::get('/price-update', [App\Http\Controllers\Api\PriceUpdateController::class, 'priceHandle']);
 Route::post('/register-price-update-handler', [PriceUpdateController::class, 'registerPriceUpdateHandler']);
