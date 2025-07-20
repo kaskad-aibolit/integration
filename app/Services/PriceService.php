@@ -70,26 +70,26 @@ class PriceService
     public function registerPriceUpdateHandler($handlerUrl)
     {
         log::info('registerPriceUpdateHandler: ' . $handlerUrl);
-        $res = $this->bitrixService->call(
-            'event.get',
-            []
-        );
-        log::info('events: ' . json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        $res = $this->bitrixService->call('event.bind', [
-            'event' => 'ONCRMDYNAMICITEMUPDATE',
-            'handler' => $handlerUrl,
-        ]);
-        log::info('registerPriceUpdateHandler: ' . json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-        // log::info('registerPriceUpdateHandler: ' . $handlerUrl);
-        // $this->bitrixService->call('event.unbind', [
-        //     'event' => 'CATALOG.PRICE.ON.UPDATE',
-        //     'handler' => $handlerUrl,
-        // ]);
+        // $res = $this->bitrixService->call(
+        //     'event.get',
+        //     []
+        // );
+        // log::info('events: ' . json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         // $res = $this->bitrixService->call('event.bind', [
-        //     'event' => 'CATALOG.PRICE.ON.UPDATE',
+        //     'event' => 'ONCRMDYNAMICITEMUPDATE',
         //     'handler' => $handlerUrl,
         // ]);
         // log::info('registerPriceUpdateHandler: ' . json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        log::info('registerPriceUpdateHandler: ' . $handlerUrl);
+        $this->bitrixService->call('event.unbind', [
+            'event' => 'CATALOG.PRICE.ON.UPDATE',
+            'handler' => $handlerUrl,
+        ]);
+        $res = $this->bitrixService->call('event.bind', [
+            'event' => 'CATALOG.PRICE.ON.UPDATE',
+            'handler' => $handlerUrl,
+        ]);
+        log::info('registerPriceUpdateHandler: ' . json_encode($res, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     }
 
     public function setupBitrix()

@@ -38,6 +38,5 @@ Route::group(['middleware' => ['auth.api_token']], function () {
         Route::post('/update/speciality', [App\Http\Controllers\Api\KaskadController::class, 'updateSpecialityRequest']);
         Route::post('/update/cabinet', [App\Http\Controllers\Api\KaskadController::class, 'updateCabinetRequest']);
         Route::post('/update/service', [App\Http\Controllers\Api\KaskadController::class, 'updateServiceRequest']);
-      
     });
 });
