@@ -395,6 +395,7 @@ class KaskadController extends Controller
                             ]
                         );
                         $id = $res['result'];
+						log::info('instanceList add visit id: ', ['id' => $id]);
                     }
                     
                     if($instanceList['total'] != 0) {
@@ -407,8 +408,8 @@ class KaskadController extends Controller
                             ]
                         );
                         $id = $instanceList['result']['items'][0]['id'];
+						log::info('instanceList update visit id: ', ['id' => $id]);
                     }
-                    log::info('update visit id: ', ['id' => $id]);
             
                     // create services connection
                     if (isset($request['services'])) {
@@ -417,7 +418,7 @@ class KaskadController extends Controller
                     
                     log::info('Background processing completed for visitId: ', ['visitId' => $request['visitId']]);
                 } catch (\Throwable $th) {
-                    log::error('Background processing error: ' . $th->getMessage());
+                    log::error('Background processing error: ', ['message' => $th->getMessage(), 'trace' => $th->getTraceAsString()]);
                 }
             });
             
