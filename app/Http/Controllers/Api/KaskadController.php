@@ -283,27 +283,15 @@ class KaskadController extends Controller
             // Process in background after response is sent
             register_shutdown_function(function() use ($requestData, $self) {
                 try {
-                    $start = microtime(true);
                     $request = new Request($requestData);
                     
                     $contactId = $self->updateContact($request);
-                    $end = microtime(true) - $start;
-                    log::info('update contact time: ' . $end);
-                    
-                    $start = microtime(true);
+					
                     $doctorId = $self->updateDoctor($request);
-                    $end = microtime(true) - $start;
-                    log::info('update doctor time: ' . $end);
                     
-                    $start = microtime(true);
                     $specialityId = $self->updateSpeciality($request);
-                    $end = microtime(true) - $start;
-                    log::info('update speciality time: ' . $end);
                     
-                    $start = microtime(true);
                     $cabinetId = $self->updateCabinet($request);
-                    $end = microtime(true) - $start;
-                    log::info('update cabinet time: ' . $end);
                     
                     $instanceList = $self->call(
                         'crm.item.list',
@@ -314,9 +302,6 @@ class KaskadController extends Controller
                             ]
                         ]
                     );
-                    $end = microtime(true);
-                    log::info('get list time: ' . ($end - $start));
-                    $start = microtime(true);
                     
                     $statuses = [
                         'reserved' => 'DT133_10:NEW',
@@ -423,20 +408,14 @@ class KaskadController extends Controller
                         );
                         $id = $instanceList['result']['items'][0]['id'];
                     }
-                    
-                    $end = microtime(true);
-                    log::info('update visit time: ' . ($end - $start));
                     log::info('update visit id: ' . $id);
             
                     // create services connection
                     if (isset($request['services'])) {
-                        $start = microtime(true);
                         $self->updateService($request['services'], $id);
-                        $end = microtime(true);
-                        log::info('update service time: ' . ($end - $start));
                     }
                     
-                    log::info('Background processing completed for visitId: ' . $request['visitId']);
+                    log::info('Background processing completed for visitId: ', ['visitId' => $request['visitId']]);
                 } catch (\Throwable $th) {
                     log::error('Background processing error: ' . $th->getMessage());
                 }
