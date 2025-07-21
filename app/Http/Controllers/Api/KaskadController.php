@@ -413,6 +413,7 @@ class KaskadController extends Controller
                     
                     $end = microtime(true);
                     log::info('update visit time: ' . ($end - $start));
+                    log::info('update visit id: ' . $id);
             
                     // create services connection
                     if (isset($request['services'])) {
