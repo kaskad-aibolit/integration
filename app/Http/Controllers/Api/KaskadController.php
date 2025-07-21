@@ -394,8 +394,7 @@ class KaskadController extends Controller
                                 'fields' => $fields
                             ]
                         );
-                        $id = $res['result'];
-						log::info('instanceList add visit id: ', ['id' => $id]);
+                        $id = $res['result']['item']['id'];
                     }
                     
                     if($instanceList['total'] != 0) {
@@ -408,8 +407,8 @@ class KaskadController extends Controller
                             ]
                         );
                         $id = $instanceList['result']['items'][0]['id'];
-						log::info('instanceList update visit id: ', ['id' => $id]);
                     }
+					log::info('visit id: ', ['id' => $id]);
             
                     // create services connection
                     if (isset($request['services'])) {
