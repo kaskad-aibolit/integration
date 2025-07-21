@@ -124,7 +124,7 @@ class KaskadController extends Controller
 				
 			}
 
-			Log::error('Catch Bitrix 24, '. json_encode($result));
+			Log::error('Catch Bitrix 24, ', ['result' => $result]);
 			return $result;
     		
 
