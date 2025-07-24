@@ -716,8 +716,4 @@ class KaskadController extends Controller
 	{
 		$file = $request->file('file');
 	}
-
-	public function addHandler(){
-
-	}
 }

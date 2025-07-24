@@ -22,10 +22,16 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Route::get('/login', [App\Http\Controllers\Api\AuthController::class, 'login']);
 Route::post('/example', [App\Http\Controllers\Api\KaskadController::class, 'example']);
 
-Route::get('/add/handler', [App\Http\Controllers\Api\KaskadController::class, 'addHandler']);
-Route::get('/price-update', [App\Http\Controllers\Api\PriceUpdateController::class, 'priceHandle']);
+
+
+// Новые маршруты для управления событиями Битрикс
+Route::post('/unregister-price-update-handler', [PriceUpdateController::class, 'unregisterPriceUpdateHandler']);
 Route::post('/register-price-update-handler', [PriceUpdateController::class, 'registerPriceUpdateHandler']);
+Route::get('/get-registered-events', [PriceUpdateController::class, 'getRegisteredEvents']);
+
 Route::post('/bitrix/price-update', [PriceUpdateController::class, 'priceHandle'])->withoutMiddleware(['auth.api_token']);
+   // Маршрут для синхронизации всех цен между смарт-процессами и каталогом
+Route::post('/sync-all-prices', [PriceUpdateController::class, 'syncAllPrices']);
 
 Route::group(['middleware' => ['auth.api_token']], function () {
     Route::prefix('bitrix24')->group(function () {
@@ -39,4 +45,6 @@ Route::group(['middleware' => ['auth.api_token']], function () {
         Route::post('/update/cabinet', [App\Http\Controllers\Api\KaskadController::class, 'updateCabinetRequest']);
         Route::post('/update/service', [App\Http\Controllers\Api\KaskadController::class, 'updateServiceRequest']);
     });
+    
+ 
 });
