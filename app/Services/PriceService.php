@@ -196,8 +196,6 @@ class PriceService
     {
         // Засекаем время начала выполнения
         $startTime = microtime(true);
-        Log::info("=== НАЧИНАЕМ СИНХРОНИЗАЦИЮ ВСЕХ ЦЕН ===");
-        Log::info("Время начала: " . date('Y-m-d H:i:s'));
 
         // Увеличиваем лимит времени выполнения до 10 минут
         set_time_limit(600); // 600 секунд = 10 минут
@@ -217,7 +215,6 @@ class PriceService
             'skippedItems' => 0,         // Пропущенные элементы
         ];
         
-        Log::info("Настройки: entityTypeId={$entityTypeId}, ownerType={$ownerType}");
 
         // Получаем все элементы смарт-процесса с пагинацией
         $start = 0;
@@ -225,7 +222,6 @@ class PriceService
         $pageNumber = 1;
         
         do {
-            Log::info("--- Обрабатываем страницу {$pageNumber} (start={$start}, limit={$limit}) ---");
             
             // Получаем страницу элементов
             $itemList = $this->bitrixService->call(
@@ -239,18 +235,15 @@ class PriceService
             
             // Проверяем результат запроса
             if (empty($itemList['result']['items'])) {
-                Log::info("Страница {$pageNumber}: элементы не найдены, завершаем обработку");
                 break;
             }
             
             $itemsOnPage = count($itemList['result']['items']);
             $stats['totalItems'] += $itemsOnPage;
-            Log::info("Страница {$pageNumber}: найдено {$itemsOnPage} элементов");
             
             // Обрабатываем каждый элемент на странице
             foreach ($itemList['result']['items'] as $itemIndex => $item) {
                 $itemId = $item['id'];
-                Log::info("Обрабатываем элемент #{$itemIndex}: ID={$itemId}");
                 
                 try {
                     // Получаем product rows для элемента
@@ -266,14 +259,12 @@ class PriceService
                     
                     // Проверяем наличие product rows
                     if (empty($productRows['result']['productRows'])) {
-                        Log::info("Элемент {$itemId}: product rows не найдены, пропускаем");
                         $stats['skippedItems']++;
                         continue;
                     }
                     
                     $rowsCount = count($productRows['result']['productRows']);
                     $stats['totalProductRows'] += $rowsCount;
-                    Log::info("Элемент {$itemId}: найдено {$rowsCount} product rows");
                     
                     // Обрабатываем каждый product row
                     foreach ($productRows['result']['productRows'] as $rowIndex => $row) {
@@ -281,7 +272,6 @@ class PriceService
                         $productId = $row['productId'];
                         $currentPrice = $row['price'];
                         
-                        Log::info("  Product Row #{$rowIndex}: ID={$rowId}, ProductID={$productId}, Текущая цена={$currentPrice}");
                         
                         try {
                             // Получаем актуальную цену из каталога товаров
@@ -308,33 +298,22 @@ class PriceService
                             $actualPrice = $catalogPriceData['price'];
                             $priceId = $catalogPriceData['id'];
                             
-                            Log::info("    Каталог: PriceID={$priceId}, Актуальная цена={$actualPrice}");
                             
                             // Сравниваем цены (используем сравнение с небольшой погрешностью для float)
                             $priceDifference = abs((float)$currentPrice - (float)$actualPrice);
                             
                             if ($priceDifference < 0.01) {
-                                Log::info("    ✓ Цены совпадают, обновление не требуется");
                                 continue;
                             }
                             
-                            Log::info("    ⚠ Обнаружено расхождение цен: {$currentPrice} → {$actualPrice} (разница: {$priceDifference})");
                             
-                            // Обновляем цену в product row
+                            // Обновляем только цену в product row
                             $updateResult = $this->bitrixService->call(
                                 'crm.item.productrow.update',
                                 [
                                     'id' => $rowId,
                                     'fields' => [
-                                        'productId' => $row['productId'],
                                         'price' => $actualPrice,
-                                        'quantity' => $row['quantity'],
-                                        'discountTypeId' => $row['discountTypeId'] ?? 2,
-                                        'discountRate' => $row['discountRate'] ?? 0,
-                                        'taxRate' => $row['taxRate'] ?? 0,
-                                        'taxIncluded' => $row['taxIncluded'] ?? 'N',
-                                        'measureCode' => $row['measureCode'] ?? 796,
-                                        'sort' => $row['sort'] ?? 10,
                                     ]
                                 ]
                             );
@@ -342,7 +321,6 @@ class PriceService
                             // Проверяем результат обновления
                             if (!empty($updateResult['result'])) {
                                 $stats['updatedPrices']++;
-                                Log::info("    ✓ Цена успешно обновлена: {$currentPrice} → {$actualPrice}");
                             } else {
                                 $stats['errors']++;
                                 Log::error("    ✗ Ошибка обновления цены: " . json_encode($updateResult));
@@ -363,16 +341,6 @@ class PriceService
             // Переходим к следующей странице
             $start += $limit;
             $pageNumber++;
-            
-            // Выводим промежуточную статистику каждые 5 страниц
-            if ($pageNumber % 5 == 0) {
-                Log::info("--- Промежуточная статистика после {$pageNumber} страниц ---");
-                Log::info("Обработано элементов: {$stats['totalItems']}");
-                Log::info("Обработано product rows: {$stats['totalProductRows']}");
-                Log::info("Проверено цен: {$stats['checkedPrices']}");
-                Log::info("Обновлено цен: {$stats['updatedPrices']}");
-                Log::info("Ошибок: {$stats['errors']}");
-            }
             
         } while (isset($itemList['next']) && $itemList['next'] > 0);
         
